@@ -8,6 +8,7 @@ import com.datoramahw.email.EmailSender;
 import com.datoramahw.pages.LiveMap;
 import com.datoramahw.pages.NavigationRoute;
 import com.google.common.base.Strings;
+import com.sun.javaws.exceptions.MissingFieldException;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.MultiPartEmail;
@@ -33,32 +34,38 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        StringBuilder message = new StringBuilder("Results for navigation from " + MY_ADDRESS + " to " + DATORAMA_ADDRESS + "\n\n");
+        if (args.length < 1) {
+            throw new Exception("Please provide email address to send the report to");
+        }
+        String toEmail = args[0];
         setUp();
-        liveMap.getDirections(MY_ADDRESS, DATORAMA_ADDRESS);
+        try {
+            StringBuilder message = new StringBuilder("Results for navigation from " + MY_ADDRESS + " to " + DATORAMA_ADDRESS + "\n\n");
+            liveMap.getDirections(MY_ADDRESS, DATORAMA_ADDRESS);
 
-        List<String> leaveTimes = Arrays.asList("07:00", "08:00", "09:00");
-        List<NavigationRoute> navigationRoutes = getNavigationRoutesForLeaveTimes(leaveTimes);
+            List<String> leaveTimes = Arrays.asList("07:00", "08:00", "09:00");
+            List<NavigationRoute> navigationRoutes = getNavigationRoutesForLeaveTimes(leaveTimes);
 
-        navigationRoutes.sort(null);
-        message.append("Resulting routes for hours ").append(String.join(",", leaveTimes)).append(":\n");
-        navigationRoutes.forEach(route -> message.append(route.toString()));
+            navigationRoutes.sort(null);
+            message.append("Resulting routes for hours ").append(String.join(",", leaveTimes)).append(":\n");
+            navigationRoutes.forEach(route -> message.append(route.toString()));
 
 
-        List<String> allRoundLeaveTimes = liveMap.getAllRoundLeaveTimes();
-        List<NavigationRoute> routesForAllRoundLeaveTimes = getNavigationRoutesForLeaveTimes(allRoundLeaveTimes);
-        message.append("\n--------------------\n");
-        message.append("All Routes\n");
-        routesForAllRoundLeaveTimes.forEach(route -> message.append(route.toString()));
-        routesForAllRoundLeaveTimes.sort(null);
-        message.append("\nShortest:\n");
-        message.append(routesForAllRoundLeaveTimes.get(0));
-        message.append("Longest:\n");
-        message.append(routesForAllRoundLeaveTimes.get(routesForAllRoundLeaveTimes.size() - 1));
+            List<String> allRoundLeaveTimes = liveMap.getAllRoundLeaveTimes();
+            List<NavigationRoute> routesForAllRoundLeaveTimes = getNavigationRoutesForLeaveTimes(allRoundLeaveTimes);
+            message.append("\n--------------------\n");
+            message.append("All Routes\n");
+            routesForAllRoundLeaveTimes.forEach(route -> message.append(route.toString()));
+            routesForAllRoundLeaveTimes.sort(null);
+            message.append("\nShortest:\n");
+            message.append(routesForAllRoundLeaveTimes.get(0));
+            message.append("Longest:\n");
+            message.append(routesForAllRoundLeaveTimes.get(routesForAllRoundLeaveTimes.size() - 1));
 
-        new EmailSender().send(args[0], message.toString());
-
-        tearDown();
+            new EmailSender().send(toEmail, message.toString());
+        }finally {
+            tearDown();
+        }
     }
 
     private static List<NavigationRoute> getNavigationRoutesForLeaveTimes(List<String> leaveTimes) throws InterruptedException {

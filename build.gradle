@@ -1,11 +1,15 @@
 plugins {
     id 'java'
+    apply plugin: 'application'
+    apply plugin: 'distribution'
 }
 
 group 'polina'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+mainClassName = "com.datoramahw.main.Main"
+
 
 repositories {
     mavenCentral()
