@@ -115,6 +115,6 @@ public class NavigationRoute implements Comparable{
     public String toString() {
         return " time: " + this.getDuration()
                 + "min lenght: " + this.getDistance()
-                + " km leave at: " + this.getLeaveAt();
+                + " km leave at: " + this.getLeaveAt() + "\n";
     }
 }

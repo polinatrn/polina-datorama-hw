@@ -4,8 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.datoramahw.email.EmailSender;
 import com.datoramahw.pages.LiveMap;
 import com.datoramahw.pages.NavigationRoute;
+import com.google.common.base.Strings;
+import org.apache.commons.mail.DefaultAuthenticator;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.MultiPartEmail;
+import org.apache.commons.mail.SimpleEmail;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
@@ -16,7 +22,7 @@ public class Main {
     private static WebDriver driver;
 
     private static final String DATORAMA_ADDRESS = "Yigal Alon St 94, Tel Aviv-Yafo, Israel";
-    private static final String MY_ADDRESS = "Shahal 4 hadera";
+    private static final String MY_ADDRESS = "Shahal 4, Hadera";
     private static LiveMap liveMap;
 
     public static void setUp() throws Exception {
@@ -27,6 +33,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        StringBuilder message = new StringBuilder("Results for navigation from " + MY_ADDRESS + " to " + DATORAMA_ADDRESS + "\n\n");
         setUp();
         liveMap.getDirections(MY_ADDRESS, DATORAMA_ADDRESS);
 
@@ -34,21 +41,22 @@ public class Main {
         List<NavigationRoute> navigationRoutes = getNavigationRoutesForLeaveTimes(leaveTimes);
 
         navigationRoutes.sort(null);
-        System.out.println("Resulting routes:");
-        navigationRoutes.forEach(System.out::println);
+        message.append("Resulting routes for hours ").append(String.join(",", leaveTimes)).append(":\n");
+        navigationRoutes.forEach(route -> message.append(route.toString()));
 
 
         List<String> allRoundLeaveTimes = liveMap.getAllRoundLeaveTimes();
         List<NavigationRoute> routesForAllRoundLeaveTimes = getNavigationRoutesForLeaveTimes(allRoundLeaveTimes);
-        System.out.println("--------------------");
-        System.out.println("All Routes");
-        routesForAllRoundLeaveTimes.forEach(System.out::println);
+        message.append("\n--------------------\n");
+        message.append("All Routes\n");
+        routesForAllRoundLeaveTimes.forEach(route -> message.append(route.toString()));
         routesForAllRoundLeaveTimes.sort(null);
-        System.out.println("Shortest:");
-        System.out.println(routesForAllRoundLeaveTimes.get(0));
-        System.out.println("Longest:");
-        System.out.println(routesForAllRoundLeaveTimes.get(routesForAllRoundLeaveTimes.size() - 1));
+        message.append("\nShortest:\n");
+        message.append(routesForAllRoundLeaveTimes.get(0));
+        message.append("Longest:\n");
+        message.append(routesForAllRoundLeaveTimes.get(routesForAllRoundLeaveTimes.size() - 1));
 
+        new EmailSender().send(args[0], message.toString());
 
         tearDown();
     }

@@ -16,5 +16,7 @@ repositories {
 dependencies {
     compile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
-    
+    compile group: 'org.apache.commons', name: 'commons-email', version: '1.2'
+
+
 }
